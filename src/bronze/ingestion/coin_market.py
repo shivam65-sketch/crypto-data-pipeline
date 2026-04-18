@@ -31,7 +31,7 @@ def upload_coin_market_top_by_market_cap(spark):       #top 1k coins by market c
     StructField('atl_change_percentage',StringType(), True),
     StructField('atl_date',StringType(), True),
     StructField('roi',StringType(), True),
-    StructField('last_updated',StringType(), True),
+    StructField('last_updated',StringType(), True)
 ])
     
     url = 'https://api.coingecko.com/api/v3/coins/markets'
@@ -83,7 +83,7 @@ def upload_coin_market_top_by_volume(spark):           #top 1k coins by volume
     StructField('atl_change_percentage',StringType(), True),
     StructField('atl_date',StringType(), True),
     StructField('roi',StringType(), True),
-    StructField('last_updated',StringType(), True),
+    StructField('last_updated',StringType(), True)
 ])
 
     url = 'https://api.coingecko.com/api/v3/coins/markets'
