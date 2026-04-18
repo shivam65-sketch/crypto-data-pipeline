@@ -1,13 +1,10 @@
-# SparkSession is provided by Databricks runtime
-# For local execution, initialize manually
-from pyspark.sql import SparkSession
+from fetcher import fetch_pages
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
-from fetcher import fetch
 
-spark = SparkSession.builder.appName("Crypto").getOrCreate()
+def upload_coin_market_top_by_market_cap(spark):       #top 1k coins by market cap
+    table= 'coin_market_top_by_market_cap'
 
-def upload_coin_market_top_by_market_cap():       #top 1k coins by market cap
     schema = StructType([
     StructField('id',StringType(), True),
     StructField('symbol',StringType(), True),
@@ -44,16 +41,22 @@ def upload_coin_market_top_by_market_cap():       #top 1k coins by market cap
     'per_page': 250,
 }
     
-    df_bronze = spark.createDataFrame(fetch(url,params),schema)
+    df_bronze = spark.createDataFrame(fetch_pages(url,params),schema)
     df_bronze = df_bronze.withColumn('bronze_create_timestamp',current_timestamp())
     try:
         df_bronze.write.mode('overwrite')\
-            .saveAsTable('prod.bronze.coin_market_top_by_market_cap')
+            .saveAsTable(f'prod.bronze.{table}')
     except Exception as e:
         print(f'upload failed: {e}')
         raise
+    if spark.catalog.tableExists(f'prod.bronze.{table}'):
+        print(f'{table} created!')
+    else:
+        print("Table creation failed!")
 
-def upload_coin_market_top_by_volume():           #top 1k coins by volume
+def upload_coin_market_top_by_volume(spark):           #top 1k coins by volume
+    table = 'coin_market_top_by_volume'
+
     schema = StructType([
     StructField('id',StringType(), True),
     StructField('symbol',StringType(), True),
@@ -90,11 +93,15 @@ def upload_coin_market_top_by_volume():           #top 1k coins by volume
         'per_page': 250
     }
 
-    df_bronze = spark.createDataFrame(fetch(url,params),schema)
+    df_bronze = spark.createDataFrame(fetch_pages(url,params),schema)
     df_bronze = df_bronze.withColumn('bronze_create_timestamp',current_timestamp())
     try:
         df_bronze.write.mode('overwrite')\
-            .saveAsTable('prod.bronze.coin_market_top_by_volume')
+            .saveAsTable(f'prod.bronze.{table}')
     except Exception as e:
         print(f'upload failed: {e}')
         raise
+    if spark.catalog.tableExists(f'prod.bronze.{table}'):
+        print(f'{table} created!')
+    else:
+        print("Table creation failed!")
