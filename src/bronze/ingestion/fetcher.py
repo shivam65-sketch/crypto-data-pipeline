@@ -4,7 +4,7 @@ from datetime import date
 import builtins
 import time
 
-def fetch(url,base_params):
+def fetch_pages(url,base_params):       #for the endpoints where there's pagination
     all_data=[]
     page = 1
     retries = 0
@@ -35,3 +35,10 @@ def fetch(url,base_params):
         print(page-1)
 
     return all_data
+
+def fetch(url,params):              #for the endpoints where there's no pagination
+    response = requests.get(url,params=params)
+    if response.status_code != 200:
+        raise Exception(f'fetch failed: {response.text}')
+    data = response.json()
+    return data
