@@ -43,8 +43,10 @@ def upload_coin_market_top_by_market_cap(spark):       #top 1k coins by market c
     
     df_bronze = spark.createDataFrame(fetch_pages(url,params),schema)
     df_bronze = df_bronze.withColumn('bronze_create_timestamp',current_timestamp())
+    df_bronze = df_bronze.withColumn('created_date',to_date(current_timestamp()))
     try:
-        df_bronze.write.mode('overwrite')\
+        df_bronze.write.mode('append')\
+            .partitionBy('created_date')\
             .saveAsTable(f'prod.bronze.{table}')
     except Exception as e:
         print(f'upload failed: {e}')
@@ -95,8 +97,10 @@ def upload_coin_market_top_by_volume(spark):           #top 1k coins by volume
 
     df_bronze = spark.createDataFrame(fetch_pages(url,params),schema)
     df_bronze = df_bronze.withColumn('bronze_create_timestamp',current_timestamp())
+    df_bronze = df_bronze.withColumn('created_date',to_date(current_timestamp()))
     try:
-        df_bronze.write.mode('overwrite')\
+        df_bronze.write.mode('append')\
+            .partitionBy('created_date')\
             .saveAsTable(f'prod.bronze.{table}')
     except Exception as e:
         print(f'upload failed: {e}')
