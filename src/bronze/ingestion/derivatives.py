@@ -26,12 +26,29 @@ def upload_derivatives(spark):
 
     }
 
-    df_bronze = spark.createDataFrame(fetch(url,params),schema)
+    data = fetch(url,params)
+    if not data or len(data) == 0:
+        raise Exception('Empty API response')
+
+    if not isinstance(data,list):
+        raise Exception("Unexpected API format")
+
+    df_bronze = spark.createDataFrame(data,schema)
+    print("Raw rows:", df_bronze.count())
+    df_bronze = df_bronze.filter(
+        (col('market').isNotNull())\
+        & (col('contract_type').isNotNull())\
+        & (lower(col('market')) == 'binance (futures)')\
+        & (lower(col('contract_type')).contains('perpetual'))
+        & (lower(col('symbol')).contains('usdt'))
+    )
+    print("Filtered rows:", df_bronze.count())
     df_bronze = df_bronze.withColumn('bronze_create_timestamp',current_timestamp())
-    df_bronze = df_bronze.withColumn('created_date',to_date(current_timestamp()))
+    df_bronze = df_bronze.withColumn('created_date',to_date(col('bronze_create_timestamp')))
+    df_bronze = df_bronze.withColumn('created_hour',hour(col('bronze_create_timestamp')))
     try:
         df_bronze.write.mode('append')\
-            .partitionBy('created_date')\
+            .partitionBy('created_date','created_hour')\
             .saveAsTable(f'prod.bronze.{table}')
     except Exception as e:
         print(f'upload failed: {e}')
