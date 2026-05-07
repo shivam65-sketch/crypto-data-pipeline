@@ -3,7 +3,7 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 
 def upload_derivatives(spark):
-    table = 'derivatives'
+    table = 'b_derivatives'
     schema = StructType([
     StructField('market',StringType(), True),
     StructField('symbol',StringType(), True),
