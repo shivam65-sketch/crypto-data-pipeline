@@ -132,7 +132,7 @@ def silver_upload_derivatives(spark):
             .format("delta")\
             .mode("append")\
             .partitionBy("created_date")\
-            .saveAsTable("prod.silver.derivatives")
+            .saveAsTable("prod.silver.s_derivatives")
         print("Table prod.silver.derivatives updated")
     except Exception as e:
         print(f"silver upload failed: {e}")
